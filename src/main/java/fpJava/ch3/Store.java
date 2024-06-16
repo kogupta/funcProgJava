@@ -18,11 +18,6 @@ public final class Store {
         System.out.printf("Total weight: %s%n", weight);
     }
 
-    private static void assertThat(boolean predicate, String msg) {
-        if (!predicate)
-            throw new AssertionError(msg);
-    }
-
     record Product(String name, double price, double weight) {}
 
     record OrderLine(Product product, int count) {
