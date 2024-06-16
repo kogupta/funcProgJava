@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.IntBinaryOperator;
+import java.util.function.Predicate;
 
 public final class Folds {
     private Folds() {}
@@ -32,6 +33,14 @@ public final class Folds {
             List<Integer> got = mapViaFold(List.of(1, 2, 3), n -> n + 1);
             assertThat(got.equals(List.of(2, 3, 4)), "mapViaFold: got: " + got);
         }
+        {
+            List<Integer> got = unfold(2, n -> n * 2, n -> n < 50);
+            assertThat(got.equals(List.of(2, 4, 8, 16, 32)), "unfold: got: " + got);
+
+            // range
+            assertThat(closedRange(1, 5).equals(List.of(1, 2, 3, 4, 5)), "range test");
+            assertThat(closedRange(1, 5).equals(closedRange2(1, 5)), "range in terms of unfold");
+        }
     }
 
     private static void assertThat(boolean predicate, String msg) {
@@ -45,7 +54,7 @@ public final class Folds {
         return result;
     }
 
-    private static <T, R> R foldLeft(List<T> xs, R zero, BiFunction<R, T, R> combiner) {
+    public static <T, R> R foldLeft(List<T> xs, R zero, BiFunction<R, T, R> combiner) {
         R result = zero;
         for (T x : xs) result = combiner.apply(result, x);
         return result;
@@ -68,5 +77,33 @@ public final class Folds {
             acc.add(mapper.apply(t));
             return acc;
         });
+    }
+
+    private static List<Integer> closedRange(int start, int end) {
+        assertThat(end > start,
+                "expected: end > start, got: start: %d, end: %d".formatted(start, end));
+
+        List<Integer> result = new ArrayList<>(end - start + 1);
+        for (int i = start; i <= end; i++) result.add(i);
+
+        return result;
+    }
+
+    private static List<Integer> closedRange2(int start, int end) {
+        assertThat(end > start,
+                "expected: end > start, got: start: %d, end: %d".formatted(start, end));
+
+        return unfold(start, n -> n + 1, n -> n <= end);
+    }
+
+    private static <T> List<T> unfold(T seed, Function<T, T> generator, Predicate<T> predicate) {
+        List<T> result = new ArrayList<>();
+        T t = seed;
+        while (predicate.test(t)) {
+            result.add(t);
+            t = generator.apply(t);
+        }
+
+        return result;
     }
 }
