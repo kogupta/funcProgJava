@@ -3,14 +3,14 @@ package fpJava.ch4;
 import java.util.List;
 import java.util.function.Function;
 
-public final class Main {
+public final class Misc {
     // previous add method as function: int -> int -> TC<Int>
     private static Function<Integer, Function<Integer, TailCall<Integer>>> add2 =
             a -> b -> a == 0 ?
                     TailCall.value(b) :
                     TailCall.suspend(() -> add(a - 1, b + 1));
 
-    private Main() {}
+    private Misc() {}
 
     public static void main(String[] args) {
         TailCall<Integer> n = add(10_000, 10_000);
