@@ -3,6 +3,7 @@ package fpJava.ch5;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -49,6 +50,10 @@ public sealed interface PList<T> extends Iterable<T> { // P -> persistent
 
     <U> U foldLeft(U zero, BiFunction<U, ? super T, U> combiner);
 
+    void foreach(Consumer<T> consumer);
+
+    String toString();
+
     enum NilIterator implements Iterator {
         Instance;
 
@@ -92,9 +97,15 @@ public sealed interface PList<T> extends Iterable<T> { // P -> persistent
         public <U> U foldLeft(U zero, BiFunction<U, ? super T, U> combiner) {return zero;}
 
         @Override
+        public void foreach(Consumer<T> consumer) {}
+
+        @Override
         public Iterator<T> iterator() {
             return NilIterator.Instance;
         }
+
+        @Override
+        public String toString() {return "Nil";}
     }
 
     record Cons<T>(T head, PList<T> tail) implements PList<T> {
@@ -152,7 +163,20 @@ public sealed interface PList<T> extends Iterable<T> { // P -> persistent
         }
 
         @Override
+        public void foreach(Consumer<T> consumer) {
+            for (T t : this)
+                consumer.accept(t);
+        }
+
+        @Override
         public Iterator<T> iterator() {return new ConsIterator<>(this);}
+
+        @Override
+        public String toString() {
+            BiFunction<StringBuilder, T, StringBuilder> combiner = (acc, t) ->
+                    acc.isEmpty() ? acc.append(t) : acc.append(", ").append(t);
+            return foldLeft(new StringBuilder(), combiner).toString();
+        }
     }
 
     final class ConsIterator<T> implements Iterator<T> {
@@ -162,7 +186,7 @@ public sealed interface PList<T> extends Iterable<T> { // P -> persistent
 
         @Override
         public boolean hasNext() {
-            return !xs.tail().isEmpty();
+            return !xs.isEmpty();
         }
 
         @Override
