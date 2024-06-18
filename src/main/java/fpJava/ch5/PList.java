@@ -44,11 +44,14 @@ public sealed interface PList<T> extends Iterable<T> { // P -> persistent
 
     PList<T> reverse();
 
+    PList<T> filter(Predicate<T> predicate);
     <U> PList<U> map(Function<? super T, ? extends U> mapper);
 
     <U> PList<U> flatMap(Function<? super T, PList<U>> mapper);
 
     <U> U foldLeft(U zero, BiFunction<U, ? super T, U> combiner);
+
+    <U> U foldRight(U zero, BiFunction<? super T, U, U> combiner);
 
     void foreach(Consumer<T> consumer);
 
@@ -88,6 +91,9 @@ public sealed interface PList<T> extends Iterable<T> { // P -> persistent
         public PList<T> reverse() {return this;}
 
         @Override
+        public PList<T> filter(Predicate<T> predicate) {return this;}
+
+        @Override
         public <U> PList<U> map(Function<? super T, ? extends U> mapper) {return (PList<U>) this;}
 
         @Override
@@ -95,6 +101,9 @@ public sealed interface PList<T> extends Iterable<T> { // P -> persistent
 
         @Override
         public <U> U foldLeft(U zero, BiFunction<U, ? super T, U> combiner) {return zero;}
+
+        @Override
+        public <U> U foldRight(U zero, BiFunction<? super T, U, U> combiner) {return zero;}
 
         @Override
         public void foreach(Consumer<T> consumer) {}
@@ -143,6 +152,12 @@ public sealed interface PList<T> extends Iterable<T> { // P -> persistent
         }
 
         @Override
+        public PList<T> filter(Predicate<T> predicate) {
+            PList<T> xs = foldLeft(empty(), (acc, t) -> predicate.test(t) ? acc.prepend(t) : acc);
+            return xs.reverse();
+        }
+
+        @Override
         public <U> PList<U> map(Function<? super T, ? extends U> mapper) {
             PList<U> xs = foldLeft(empty(), (acc, t) -> acc.prepend(mapper.apply(t)));
             return xs.reverse();
@@ -160,6 +175,11 @@ public sealed interface PList<T> extends Iterable<T> { // P -> persistent
                 result = combiner.apply(result, t);
 
             return result;
+        }
+
+        @Override
+        public <U> U foldRight(U zero, BiFunction<? super T, U, U> combiner) {
+            return reverse().foldLeft(zero, (acc, t) -> combiner.apply(t, acc));
         }
 
         @Override
