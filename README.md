@@ -7,7 +7,10 @@ Working through [Functional Programming in Java](https://www.manning.com/books/f
 
 #### Chapter 5 - persistent list
 
-`foldRight` => `foldLeft` followed by `reverse`
+- `foldRight` => `foldLeft` followed by `reverse`
+- [vavr List](https://github.com/vavr-io/vavr/blob/master/src/main/java/io/vavr/collection/List.java#L811)
+- [scala immutable List](https://github.com/scala/scala/blob/2.13.x/src/library/scala/collection/immutable/List.scala)
+- interesting persistent collections lib [bifurcan](https://github.com/lacuna/bifurcan/blob/master/doc/comparison.md)
 
 #### Chapter 6 - Maybe
 
