@@ -1,6 +1,9 @@
 package fpJava.ch7;
 
+import fpJava.ch6.Maybe;
+
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public sealed interface Result<V> {
@@ -28,7 +31,7 @@ public sealed interface Result<V> {
         }
     }
 
-    private static <V, U> Result<U> of(V v, Function<V, Result<U>> f) {
+    private static <V, U> Result<U> _checkedFlatMap(V v, Function<V, Result<U>> f) {
         try {
             return f.apply(v);
         } catch (Exception e) {
@@ -36,8 +39,12 @@ public sealed interface Result<V> {
         }
     }
 
-    private static <T> Result<T> cast(Result<?> r) {
-        return (Result<T>) r;
+    private static <V> Result<V> _checkedFilter(Predicate<V> predicate, Success<V> result) {
+        try {
+            return predicate.test(result.get) ? result : failure("Condition didn't match");
+        } catch (Exception e) {
+            return failure(e);
+        }
     }
 
     V get();
@@ -68,19 +75,49 @@ public sealed interface Result<V> {
     default <U> Result<U> map(Function<V, U> f) {
         return switch (this) {
             case Success(V v) -> of(() -> f.apply(v));
-            case Failure<V> _ -> cast(this);
+            case Failure<V> _ -> (Result<U>) this;
         };
     }
 
     default <U> Result<U> flatMap(Function<V, Result<U>> f) {
         return switch (this) {
-            case Success(V v) -> of(v, f);
-            case Failure<V> _ -> cast(this);
+            case Success(V v) -> _checkedFlatMap(v, f);
+            case Failure<V> _ -> (Result<U>) this;
         };
     }
 
     default Result<V> orElse(Supplier<Result<V>> defaultValue) {
         return map(_ -> this).getOrElse(defaultValue);
+    }
+
+    default Maybe<V> toMaybe() {
+        return switch (this) {
+            case Success(V v) -> Maybe.some(v);
+            case Failure<V> _ -> Maybe.none();
+        };
+    }
+
+    default Result<V> filter(Predicate<V> predicate) {
+        return switch (this) {
+            case Success<V> r -> _checkedFilter(predicate, r);
+            case Failure<V> _ -> this;
+        };
+    }
+
+    default boolean exists(Predicate<V> predicate) {
+//        return map(predicate::test).getOrElse(false);
+        try {
+            return predicate.test(get());
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    default Result<V> mapFailure(String errorMessage) {
+        return switch (this) {
+            case Success(V _) -> this;
+            case Failure(RuntimeException re) -> failure(new IllegalStateException(errorMessage, re));
+        };
     }
 
     record Success<V>(V get) implements Result<V> {}
