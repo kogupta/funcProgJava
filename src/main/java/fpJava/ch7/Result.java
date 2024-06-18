@@ -120,6 +120,34 @@ public sealed interface Result<V> {
         };
     }
 
+    static <A, B> Function<Result<A>, Result<B>> lift(final Function<A, B> f) {
+        return ra -> ra.map(f);
+    }
+
+    static <A, B, C> Function<Result<A>, Function<Result<B>, Result<C>>> lift2(Function<A, Function<B, C>> f) {
+        return ra -> rb -> ra.flatMap(a -> rb.map(b -> f.apply(a).apply(b)));
+    }
+
+    static <A, B, C, D> Function<Result<A>,
+            Function<Result<B>,
+                    Function<Result<C>, Result<D>>>> lift3(Function<A, Function<B, Function<C, D>>> f) {
+        return ra -> rb -> rc ->
+                ra.flatMap(a ->
+                        rb.flatMap(b ->
+                                rc.map(c -> f.apply(a).apply(b).apply(c))));
+    }
+
+    static <A, B, C> Result<C> map2(Result<A> ra, Result<B> rb, Function<A, Function<B, C>> f) {
+        return lift2(f).apply(ra).apply(rb);
+    }
+
+    default void forEachOrThrow(Effect<V> effect) {
+        switch (this) {
+            case Success(V v) -> effect.apply(v);
+            case Failure(var re) -> throw re;
+        }
+    }
+
     record Success<V>(V get) implements Result<V> {}
 
     record Failure<V>(RuntimeException re) implements Result<V> {
