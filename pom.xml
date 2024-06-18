@@ -15,4 +15,16 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
+    <dependencies>
+        <dependency>
+            <groupId>io.vavr</groupId>
+            <artifactId>vavr</artifactId>
+            <version>1.0.0-alpha-4</version>
+        </dependency>
+        <dependency>
+            <groupId>io.lacuna</groupId>
+            <artifactId>bifurcan</artifactId>
+            <version>0.2.0-alpha7</version>
+        </dependency>
+    </dependencies>
 </project>

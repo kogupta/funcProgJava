@@ -1,11 +1,12 @@
 package fpJava.ch5;
 
+import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public sealed interface PList<T> { // P -> persistent
+public sealed interface PList<T> extends Iterable<T> { // P -> persistent
     PList<?> empty = new Nil<>();
 
     static <A> PList<A> concat(PList<A> xs, PList<A> ys) {
@@ -16,11 +17,11 @@ public sealed interface PList<T> { // P -> persistent
     }
 
     @SuppressWarnings("unchecked")
-    static <T> PList<T> of() {return (PList<T>) empty;}
+    static <T> PList<T> empty() {return (PList<T>) empty;}
 
     @SafeVarargs
     static <T> PList<T> of(T... xs) {
-        PList<T> result = of();
+        PList<T> result = empty();
         for (int i = xs.length - 1; i >= 0; i--) {
             T x = xs[i];
             result = new Cons<>(x, result);
@@ -34,9 +35,7 @@ public sealed interface PList<T> { // P -> persistent
 
     boolean isEmpty();
 
-    default PList<T> prepend(T elem) {
-        return new Cons<>(elem, this);
-    }
+    default PList<T> prepend(T elem) {return new Cons<>(elem, this);}
 
     PList<T> drop(int n);
 
@@ -49,6 +48,20 @@ public sealed interface PList<T> { // P -> persistent
     <U> PList<U> flatMap(Function<? super T, PList<U>> mapper);
 
     <U> U foldLeft(U zero, BiFunction<U, ? super T, U> combiner);
+
+    enum NilIterator implements Iterator {
+        Instance;
+
+        @Override
+        public boolean hasNext() {
+            return false;
+        }
+
+        @Override
+        public Object next() {
+            throw new NoSuchElementException("next of an empty list");
+        }
+    }
 
     record Nil<T>() implements PList<T> {
         @Override
@@ -65,6 +78,23 @@ public sealed interface PList<T> { // P -> persistent
 
         @Override
         public PList<T> dropWhile(Predicate<T> predicate) {return this;}
+
+        @Override
+        public PList<T> reverse() {return this;}
+
+        @Override
+        public <U> PList<U> map(Function<? super T, ? extends U> mapper) {return (PList<U>) this;}
+
+        @Override
+        public <U> PList<U> flatMap(Function<? super T, PList<U>> mapper) {return (PList<U>) this;}
+
+        @Override
+        public <U> U foldLeft(U zero, BiFunction<U, ? super T, U> combiner) {return zero;}
+
+        @Override
+        public Iterator<T> iterator() {
+            return NilIterator.Instance;
+        }
     }
 
     record Cons<T>(T head, PList<T> tail) implements PList<T> {
@@ -92,6 +122,54 @@ public sealed interface PList<T> { // P -> persistent
             }
 
             return result;
+        }
+
+        @Override
+        public PList<T> reverse() {
+            return tail.isEmpty() ?
+                    this :
+                    foldLeft(empty(), PList::prepend);
+        }
+
+        @Override
+        public <U> PList<U> map(Function<? super T, ? extends U> mapper) {
+            PList<U> xs = foldLeft(empty(), (acc, t) -> acc.prepend(mapper.apply(t)));
+            return xs.reverse();
+        }
+
+        @Override
+        public <U> PList<U> flatMap(Function<? super T, PList<U>> mapper) {
+            return foldLeft(empty(), (acc, t) -> concat(acc, (mapper.apply(t))));
+        }
+
+        @Override
+        public <U> U foldLeft(U zero, BiFunction<U, ? super T, U> combiner) {
+            U result = zero;
+            for (T t : this)
+                result = combiner.apply(result, t);
+
+            return result;
+        }
+
+        @Override
+        public Iterator<T> iterator() {return new ConsIterator<>(this);}
+    }
+
+    final class ConsIterator<T> implements Iterator<T> {
+        private PList<T> xs;
+
+        public ConsIterator(Cons<T> cons) {this.xs = cons;}
+
+        @Override
+        public boolean hasNext() {
+            return !xs.tail().isEmpty();
+        }
+
+        @Override
+        public T next() {
+            T t = xs.head();
+            xs = xs.tail();
+            return t;
         }
     }
 }
