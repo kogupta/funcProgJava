@@ -5,15 +5,11 @@ import java.util.function.Supplier;
 
 public sealed interface Stream<A> permits Stream.Cons, Stream.Empty {
     static <A> Stream<A> cons(Supplier<A> head, Supplier<Stream<A>> tail) {return new Cons<>(head, tail);}
-
     static <A> Stream<A> cons(A hd, Stream<A> tl) {return new Cons<>(hd, tl);}
-
-    A head();
-
     static <A> Stream<A> empty() {return (Stream<A>) Empty.Instance;}
 
+    A head();
     Stream<A> tail();
-
     boolean isEmpty();
 
     enum Empty implements Stream<Object> {
