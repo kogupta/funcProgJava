@@ -3,13 +3,13 @@ package fpJava.ch13;
 import io.vavr.control.Try;
 
 public interface Input {
-    Try<InputT<String>> readString();
+    Try<ValueAndInput<String>> readString();
 
-    Try<InputT<String>> readString(String message);
+    Try<ValueAndInput<String>> readString(String message);
 
-    Try<InputT<Integer>> readInt();
+    Try<ValueAndInput<Integer>> readInt();
 
-    Try<InputT<Integer>> readInt(String message);
+    Try<ValueAndInput<Integer>> readInt(String message);
 
     public static void main(String[] args) {
 
@@ -21,5 +21,9 @@ public interface Input {
     }
 
     // impl AND type alias for Tuple<T, Input>
-    record InputT<T>(T t, Input input) {}
+    record ValueAndInput<T>(T value, Input input) {}
+
+    default <T> ValueAndInput<T> valueAndInput(T t) {
+        return new ValueAndInput<>(t, this);
+    }
 }

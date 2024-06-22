@@ -41,7 +41,7 @@ public sealed interface Result<V> {
 
     private static <V> Result<V> _checkedFilter(Predicate<V> predicate, Success<V> result) {
         try {
-            return predicate.test(result.get) ? result : failure("Condition didn't match");
+            return predicate.test(result.get) ? result : failure("Condition didn'value match");
         } catch (Exception e) {
             return failure(e);
         }
