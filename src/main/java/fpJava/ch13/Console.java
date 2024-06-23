@@ -36,6 +36,9 @@ public final class Console {
                 .flatMap(_ -> printLine("Si, food!"))
                 .flatMap(_ -> printLine("Ah yes, sea food \uD83E\uDD14"));
         program.run();
+
+        var repeat = IO.repeat(3, printLine("Hello! Who goes there!"));
+        repeat.run();
     }
 
     private static String buildMessage(String s) {
