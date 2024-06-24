@@ -48,11 +48,21 @@ public sealed interface Tree<A extends Comparable<A>> {
     default Maybe<A> min() {
         return switch (this) {
             case Tree.Empty<A> _ -> Maybe.none();
-            case Tree.Node(var left, A value, _, _, _) -> left.isEmpty() ?
+            case Node(var left, A value, _, _, _) -> left.isEmpty() ?
                                               Maybe.some(value) :
                                               left().min();
         };
     }
+
+    // forget deletion: imperative/(im)mutable/functional - deletion is HARD!
+//    default Tree<A> remove(A a) {
+//        return switch (this) {
+//            case Empty<A> v -> empty();
+//            case Node(var left, A value, var right, _, _) ->
+//                    Objects.equals(a, value) ? _mergeChildren(left, right) :
+//                    a.compareTo(value) > 0 ? right.remove(a) : left.remove(a);
+//        };
+//    }
 
     // factory methods
     @SuppressWarnings("rawtypes")

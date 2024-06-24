@@ -37,9 +37,9 @@ static <A> Maybe<PList<A>> sequence(PList<Maybe<A>> xs) {
 #### Conclusion
 
 FP in Java is no fun at all - [Javaslang](https://github.com/vavr-io/vavr), `sealed traits + pattern matching` help 
-though. 
+to an extent. 
 
-Biggest pain points: 
-  - no `for-comprehension`/sugar for chained `flatMap`s
+Biggest pain points from readability perspective: 
+  - no `for-comprehension` or similar syntax-sugar for chained `flatMap`s
   - function application is - for lack of a better word - "Java"-ish; we have to ALWAYS mention `fn.apply()` - `fn()` would have been much nicer to read.
-  - no local functions - again, readability hurts; all looping/helper functions with tail calls - they are almost always specific to a user facing api, no reusability whatsoever but defined at larger class scope rather than the restricted scope of usage (the method).
+  - no local functions - again, readability hurts; all looping/helper functions with tail calls - they are almost always specific to an external api/interface, no reusability whatsoever but defined at larger class scope rather than the restricted method scope.
