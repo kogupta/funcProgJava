@@ -37,7 +37,7 @@ static <A> Maybe<PList<A>> sequence(PList<Maybe<A>> xs) {
 #### Conclusion
 
 FP in Java is no fun at all - [Javaslang](https://github.com/vavr-io/vavr), `sealed traits + pattern matching` help 
-a lot though. 
+though. 
 
 Biggest pain points: 
   - no `for-comprehension`/sugar for chained `flatMap`s
