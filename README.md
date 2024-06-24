@@ -27,3 +27,19 @@ static <A> Maybe<PList<A>> sequence(PList<Maybe<A>> xs) {
     return traverse(xs, Function.identity());
 }
 ```
+
+#### Chapter 13: IO
+
+- feels rushed 🙁
+- much better coverage in [Grokking FP: IO](https://learning.oreilly.com/library/view/grokking-functional-programming/9781617291838/OEBPS/Text/08.html)
+
+
+#### Conclusion
+
+FP in Java is no fun at all - [Javaslang](https://github.com/vavr-io/vavr), `sealed traits + pattern matching` help 
+a lot though. 
+
+Biggest pain points: 
+  - no `for-comprehension`/sugar for chained `flatMap`s
+  - function application is - for lack of a better word - "Java"-ish; we have to ALWAYS mention `fn.apply()` - `fn()` would have been much nicer to read.
+  - no local functions - again, readability hurts; all looping/helper functions with tail calls - they are almost always specific to a user facing api, no reusability whatsoever but defined at larger class scope rather than the restricted scope of usage (the method).

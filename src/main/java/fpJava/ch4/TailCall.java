@@ -3,6 +3,10 @@ package fpJava.ch4;
 import java.util.function.Supplier;
 
 public sealed interface TailCall<T> {
+    TailCall<T> resume();
+    T eval();
+    boolean isSuspend();
+
     static <T> TailCall<T> value(T value) {
         return new Return<>(value);
     }
@@ -10,12 +14,6 @@ public sealed interface TailCall<T> {
     static <T> TailCall<T> suspend(Supplier<TailCall<T>> fn) {
         return new Suspend<>(fn);
     }
-
-    TailCall<T> resume();
-
-    T eval();
-
-    boolean isSuspend();
 
     record Return<T>(T eval) implements TailCall<T> {
         @Override
