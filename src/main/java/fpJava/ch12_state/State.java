@@ -31,11 +31,19 @@ public record State<S, A>(Function<S, Tuple2<S, A>> run) {
         return flatMap(a -> sb.map(b -> fn.apply(a).apply(b)));
     }
 
-    public static <S, A> State<S, List<A>> sequence(List<State<S, A>> fs) {
+    public A eval(S s) {
+        return run.apply(s)._2;
+    }
+
+    public static <S, A> State<S, List<A>> compose(List<State<S, A>> fs) {
         return fs.foldRight(
                 unit(List.empty()),
                 (f, acc) -> f.map2(acc, a -> as -> as.prepend(a))
         );
+    }
+
+    public static <S> State<S, Nothing> sequence(Function<S, S> f) {
+        return new State<>(s -> Tuple.of(f.apply(s), Nothing.Instance));
     }
 
     public static <S, A> State<S, A> unit(A a) {
