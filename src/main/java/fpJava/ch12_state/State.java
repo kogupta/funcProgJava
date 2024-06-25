@@ -41,4 +41,16 @@ public record State<S, A>(Function<S, Tuple2<S, A>> run) {
     public static <S, A> State<S, A> unit(A a) {
         return new State<>(state -> Tuple.of(state, a));
     }
+
+    public static <S> State<S, S> get() {
+        return new State<>(s -> Tuple.of(s, s));
+    }
+
+    public static <S> State<S, Nothing> set(S s) {
+        return new State<>(_ -> Tuple.of(s, Nothing.Instance));
+    }
+
+    public static <S> State<S, Nothing> modify(Function<S, S> fn) {
+        return State.<S>get().flatMap(s -> set(fn.apply(s)));
+    }
 }
